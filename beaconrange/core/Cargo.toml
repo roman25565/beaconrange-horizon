@@ -1,0 +1,13 @@
+[package]
+name = "beaconrange-core"
+version = "1.0.0"
+edition = "2024"
+license = "MIT"
+description = "BeaconRange for Horizon: beacon effect radius times a configurable multiplier"
+
+[lib]
+path = "src/lib.rs"
+
+# Only crates already in Horizon's Cargo.lock (horizon-mixins refuses others).
+[dependencies]
+log = "0.4"

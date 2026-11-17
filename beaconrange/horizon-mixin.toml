@@ -1,0 +1,32 @@
+# BeaconRange for Horizon: beacons give their powers in a radius N times the vanilla one
+# (N = `multiplier` in config/beaconrange.toml, 4 by default), for every pyramid level and
+# downwards too (vanilla reaches any height above the beacon and `range` below it).
+# Server side only: vanilla Java clients and Horizon clients see the effects as usual.
+# Build it into a dedicated-server engine with `horizon-launcher native-build ... --trust-native-code`.
+[mod]
+id = "beaconrange"
+version = "1.0.0"
+
+# The injection reaches a private function of the game (`beacon_effects_on_player`), not a
+# named catalog hook, so the mod is pinned to the Horizon commit it was written and tested against.
+[compatibility]
+horizon_revision = "fdc87aecdbd116bf1e08adcd062fcbaea8c2e2ca"
+
+# All logic (config, the scaling rule) lives here and is tested without the game: `cargo test`
+# in core/.
+[[crate]]
+id = "core"
+path = "core"
+dependent = "horizon-client"
+
+# `BeaconBlockEntity.applyEffects`: `let range = f64::from(b.levels * 10 + 10);`
+# The value stored in `range` is multiplied before the box test (x, z and the lower y bound use it).
+[[injection]]
+id = "range"
+kind = "MODIFY_VARIABLE"
+target = "horizon_client::game::beacon::Game<'_>::beacon_effects_on_player"
+variable = { name = "range", ordinal = 0, at = "STORE" }
+require = 1
+ordinal = 0
+helper = "range.rs"
+bindings = [{ name = "value", ty = "f64", value = "$value" }]
